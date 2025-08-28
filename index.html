@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toko Pribadi</title>
+  <style>
+    :root{
+      --bg:#fff;--text:#111;--sub:#555;--border:#ddd;--card:#fff;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font:15px/1.5 system-ui,Arial;background:var(--bg);color:var(--text)}
+    a{text-decoration:none;color:inherit}/* Header */
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:50}
+.hamburger{width:22px;height:14px;display:grid;gap:4px;cursor:pointer}
+.hamburger span{display:block;height:2px;background:#111;border-radius:2px}
+.logo{font-family:serif;font-weight:700;font-size:20px;letter-spacing:1px}
+.icons{display:flex;align-items:center;gap:14px;font-size:20px;cursor:pointer}
+
+/* Search bar */
+.search-bar{display:none;padding:10px 16px;border-bottom:1px solid var(--border)}
+.search-bar.active{display:flex;align-items:center;gap:8px}
+.search-bar input{flex:1;padding:8px;border:0;outline:0;font-size:15px}
+
+/* Sidebar */
+.sidebar{position:fixed;inset:0 auto 0 -260px;width:220px;background:#fff;border-right:1px solid var(--border);padding:16px;transition:.2s;z-index:60;}
+.sidebar.open{transform:translateX(260px)}
+.sidebar h3{font-size:14px;margin-bottom:10px;color:var(--sub)}
+.cat-btn{display:block;width:100%;text-align:left;padding:8px 10px;border:1px solid var(--border);margin-bottom:8px;background:#fff;cursor:pointer}
+.cat-btn.active{background:#111;color:#fff}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;padding:16px}
+.card{border:1px solid var(--border);background:var(--card);border-radius:8px;cursor:pointer;overflow:hidden}
+.thumb{aspect-ratio:1/1;display:grid;place-items:center;font-size:22px;font-weight:600;background:#f7f7f7}
+.meta{padding:8px;font-size:14px;color:var(--sub)}
+
+.empty{display:none;padding:16px;color:var(--sub)}
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hamburger" id="toggleSidebar"><span></span><span></span><span></span></div>
+    <div class="logo">Monkey Corpse</div>
+    <div class="icons">
+      <span id="toggleSearch">⌕</span>
+    </div>
+  </header>  <div class="search-bar" id="searchBar">
+    <span>⌕</span>
+    <input id="searchInput" type="search" placeholder="Cari produk..." />
+    <span id="closeSearch">✕</span>
+  </div>  <aside class="sidebar" id="sidebar">
+    <h3>Kategori</h3>
+    <button class="cat-btn active" data-cat="all">Semua</button>
+    <button class="cat-btn" data-cat="crop-top">Crop Top</button>
+    <button class="cat-btn" data-cat="tshirt">Short Sleeve Tee</button>
+    <button class="cat-btn" data-cat="long-sleeve">Long Sleeve Tee</button>
+    <button class="cat-btn" data-cat="hoodie">Hoodies</button>
+  </aside>  <main>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="empty">Tidak ada produk yang cocok.</p>
+  </main>  <script>
+  const products = [
+    {code:'001', 
+    name:'1. Cyber Sigilism Boxy',
+    cat:'long-sleeve', 
+    link:'https://shopee.co.id/product/1029015627/40560525520?gads_t_sig=VTJGc2RHVmtYMTlxTFVSVVRrdENkVHQ3ZkZSUTMrR3pBWmZZNzdrcnRBMnBOWkN3dHJKZ1NxcmpueWp4Vnh3QUE0MlloTHlGTnVDWGw0S0Z4OUM0OE90ZmFjWUUwSmdlQ1NEcDVvUlY5RTZNZkdIRHUzem5OVU5EL0paUWc3djAzZzEzdmR0T0llNTlmV2dMWGhkSHU2dWtCblBOanJydURiUlJKVGV4Vm53PQ&uls_trackid=53ibq73700em&utm_campaign=id_CDapWRmr7c&utm_content=----&utm_medium=affiliates&utm_source=an_11326620546&utm_term=djt11zq7vfmq',
+    img:'https://down-id.img.susercontent.com/file/id-11134207-7ra0k-md1u6ymajoag45@resize_w1080_nl.webp'},
+    
+    {code:'002',
+    name:'2. Sylus Long Sleeve', 
+    cat:'long-sleeve', 
+    link:'https://shopee.co.id/-Pre-Order-Long-Sleeve-%E2%80%93-Sylus-x-Cybersigilism-(1-of-1-Hand-Painted)-i.1029015627.41008326975',
+    img:'https://down-id.img.susercontent.com/file/id-11134207-7ra0q-mcrv20ys1kpzfa@resize_w1080_nl.webp'},
+ 
+    {code:'003',
+    name:'3. Cyber Sigilism Crop', 
+    cat:'crop-top', 
+    link:'https://shopee.co.id/product/1029015627/40456547546?gads_t_sig=VTJGc2RHVmtYMTlxTFVSVVRrdENkVHQ3ZkZSUTMrR3pBWmZZNzdrcnRBMnBOWkN3dHJKZ1NxcmpueWp4Vnh3QWNsU0hNdklIeUhaQm9GWUU2TGQyaURTd2lucHdRSGhNNHdTaW1nNExPS2ZQcWx2YkdoOEVVcyt2VytwWXBlVHBwaTRqclQ5SFV2R3gyNWtreGNwM1BiWnl6NWxaQjV0azRRUU5IZnhQTzdNPQ&uls_trackid=53ibsa6t01eg&utm_campaign=id_KFbJ7LzA9U&utm_content=----&utm_medium=affiliates&utm_source=an_11326620546&utm_term=djt2nvohj1vp',
+    img:'https://down-id.img.susercontent.com/file/id-11134207-7ra0s-mbktdso9mh74ce@resize_w1080_nl.webp'},
+    ];
+  const grid=document.getElementById('grid');
+  function render(list){
+    grid.innerHTML=list.map(p=>`
+      <a href="${p.link}" target="_blank" class="card" data-name="${p.name}" data-code="${p.code}" data-cat="${p.cat}">
+        <div class="thumb"><img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover"></div>
+        <div class="meta">${p.name}</div>
+      </a>`).join('');
+  }
+  render(products);
+
+    const searchInput=document.getElementById('searchInput');
+    const empty=document.getElementById('empty');
+    let currentCat='all';
+
+    function filter(query){
+      query=(query||'').toLowerCase();
+      const cards=[...grid.children];
+      let visible=0;
+      cards.forEach(card=>{
+        const name=card.dataset.name.toLowerCase();
+        const code=card.dataset.code.toLowerCase();
+        const cat=card.dataset.cat;
+        const show=(currentCat==='all'||currentCat===cat)&&(name.includes(query)||code.includes(query));
+        card.style.display=show?'':'none';
+        if(show) visible++;
+      });
+      empty.style.display=visible?'none':'block';
+    }
+    searchInput.addEventListener('input',e=>filter(e.target.value));
+
+    // Sidebar
+    const sidebar=document.getElementById('sidebar');
+    document.getElementById('toggleSidebar').addEventListener('click',()=>sidebar.classList.toggle('open'));
+    sidebar.addEventListener('click',e=>{
+      if(!e.target.matches('.cat-btn')) return;
+      sidebar.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentCat=e.target.dataset.cat;
+      filter(searchInput.value);
+      sidebar.classList.remove('open');
+    });
+
+    // Search bar toggle
+    const searchBar=document.getElementById('searchBar');
+    document.getElementById('toggleSearch').addEventListener('click',()=>searchBar.classList.add('active'));
+    document.getElementById('closeSearch').addEventListener('click',()=>searchBar.classList.remove('active'));
+
+    filter('');
+  </script></body>
+</html>
